@@ -1,0 +1,23 @@
+name: AoC 2024 Solutions
+on:
+  workflow_dispatch:
+    inputs:
+      day:
+        description: 'Day to execute (leave empty to execute all days)'
+        required: false
+        default: ''
+
+jobs:
+  solve:
+    name: Solve Puzzles
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install SWI-Prolog
+        uses: logtalk-actions/setup-swi-prolog@master
+        with:
+          swi-prolog-branch: stable
+          swi-prolog-version: latest
+      - name: Checkout AoC
+        uses: actions/checkout@v1
+      - name: Solve
+        run: if [ -z "${{ github.event.inputs.day }}" ]; then ./solveAll.sh; else ./solveAll.sh "${{ github.event.inputs.day }}_"; fi
