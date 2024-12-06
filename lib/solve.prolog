@@ -35,7 +35,7 @@ loadData([], File, Error) :- format(string(Error), 'File ~w does not exist', [Fi
 fileForDay(Day, Extension, File) :- format(atom(File), 'input/~w.~w', [Day, Extension]).
 
 notIgnored(X) :- X \== ignore.
-data_lines(Data, Lines) :- maplist(p_data_line, RawData, Lines), include(notIgnored, RawData, Data).
+data_lines(Data, Lines) :- length(Lines, LineCount), numlist(1, LineCount, Indices), maplist(p_data_line, Indices, RawData, Lines), include(notIgnored, RawData, Data).
 
 groupLines([""], [[]]) :- !.
 groupLines([Line1], [[Line1]]) :- !.
@@ -134,7 +134,7 @@ testSkipped(Text) :- yellow(' TEST SKIPPED ', Text).
 p_day(Day) :- day(Day).
 p_resetData :- current_predicate(resetData/0) -> resetData ; true.
 p_postProcessData(Data, PostprocessedData) :- current_predicate(postProcessData/2) -> postProcessData(Data, PostprocessedData) ; PostprocessedData=Data.
-p_data_line(Data, Line) :- current_predicate(data_line/2) -> data_line(Data, Line) ; Data=Line.
+p_data_line(Index, Data, Line) :- current_predicate(data_line/3) -> data_line(Index, Data, Line) ; current_predicate(data_line/2) -> data_line(Data, Line) ; Data=Line.
 p_result(Data, Result) :- result(Data, Result).
 p_result(Data, AuxData, Result) :- AuxData = none -> result(Data, Result) ; result(Data, AuxData, Result).
 p_formatResult(Result, FormattedResult) :- current_predicate(formatResult/2), !, formatResult(Result, FormattedResult). p_formatResult(Result, Result).
