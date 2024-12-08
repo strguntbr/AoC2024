@@ -22,8 +22,30 @@ isLoop(Pos, Direction) :-
   turn(Direction, NextDirection),
   isLoop(Pos, NextDirection).
 
+/*loopPossible([X,Y], [1,0]) :-
+  Yn is Y+1,
+  between(1, X, Xn),
+  lab_([Xn, Yn], '#'), !.*/
+loopPossible([X,Y], [1,0]) :-
+  Yn is Y+1,
+  lab([Xn, Yn], '#'), 
+  Xn =< X, !.
+loopPossible([X,Y], [0,-1]) :-
+  Xn is X+1,
+  lab([Xn, Yn], '#'),
+  Yn >= Y, !.
+loopPossible([X,Y], [-1,0]) :- 
+  Yn is Y-1,
+  lab([Xn, Yn], '#'), 
+  Xn >= X, !.
+loopPossible([X,Y], [0,1]) :-
+  Xn is X-1,
+  lab([Xn, Yn], '#'),
+  Yn =< Y, !.
+
 searchLoop(Pos, Direction, ObstaclePos) :-
   not(visited(ObstaclePos, _)),
+  loopPossible(Pos, Direction),
   retractall(obstacle(_)),
   retractall(tempVisited(_, _)),
   assert(obstacle(ObstaclePos)),
