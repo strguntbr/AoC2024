@@ -14,27 +14,51 @@ function displaytime {
 
 function printPuzzle {
   puzzle=$1
-  printf "%14.14s: " $puzzle
-  if prolog -q -l $puzzle -t "verifyTests"; then
-    startTime=$(date +%s%0N)
-    prolog -q -l $puzzle -t "printResultWithoutTest"
-    endTime=$(date +%s%0N)
-    duration=$(( ($endTime-$startTime)/1000000 ))
-    echo "$RESULT ($(displaytime $duration))"
+  if [[ -z "$2" ]]; then
+    parts=$(prolog -q -l $puzzle -t "parts")
   else
-    echo
+    parts="part$2"
   fi
+  for part in $parts; do
+    local fullPuzzle result
+    result=1
+    if [[ "$part" != "single" ]]; then
+      fullPuzzle="$(echo "$puzzle" | sed -n 's/\.prolog$//p')/$(echo "$part" | sed -n 's/^part//p')"
+    else
+      fullPuzzle="$(echo "$puzzle" | sed -n 's/\.prolog$//p')"
+    fi
+    printf "%6.6s: " $fullPuzzle
+    if prolog -q -l $puzzle -t "verifyTests($part)"; then
+      startTime=$(date +%s%0N)
+      prolog -q -l $puzzle -t "printResultWithoutTest($part)"
+      endTime=$(date +%s%0N)
+      duration=$(( ($endTime-$startTime)/1000000 ))
+      echo "$RESULT ($(displaytime $duration))"
+    else
+      echo
+    fi
+  done
 }
 
 function listPuzzles {
   if [ -z "$1" ]; then
-    ls *.prolog | grep -v debug | grep -v common | grep -v \'
+    ls *.prolog 2> /dev/null | grep -v debug | grep -v common | grep -v \'
   else
-    ls $1*.prolog | grep -v debug | grep -v common
+    ls $1.prolog 2> /dev/null | grep -v debug | grep -v common
+    ls $1_*.prolog 2> /dev/null | grep -v debug | grep -v common
   fi
 }
 
 IFS=$'\n'
-for puzzle in $(listPuzzles "$1" | sort -V); do
-  printPuzzle $puzzle
-done
+if [ -z "$1" ]; then
+  for puzzle in $(ls *.prolog 2> /dev/null | grep -v debug | grep -v common | grep -v \' | sort -V); do
+    printPuzzle "$puzzle"
+  done
+else
+  for puzzle in $(ls "$1.prolog" 2> /dev/null | grep -v debug | grep -v common); do
+    printPuzzle "$puzzle" "$2"
+  done
+  for puzzle in $(ls "$1_$2"*.prolog 2> /dev/null | grep -v debug | grep -v common); do
+    printPuzzle "$puzzle"
+  done
+fi

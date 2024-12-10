@@ -1,4 +1,4 @@
-day(5). testResult(123). groupData.
+day(5). testResult(part1, 143). testResult(part2, 123). groupData.
 
 :- use_module(lib/solve).
 
@@ -7,20 +7,18 @@ center(L, M) :- length(L, Len), I is div(Len, 2), nth0(I, L, M).
 unordered([H|T]) :- member(First, T), before(First, H), !.
 unordered([_|T]) :- unordered(T).
 
+ordered(L) :- \+ unordered(L).
+
 first([H|T], FirstT, [H|OtherT]) :- first(T, FirstT, OtherT), not(before(H, FirstT)), !.
 first([H|T], H, T).
 
 order([Page], [Page]) :- !.
-order(UnorderedPages, [FirstPage|OrderedPages]) :-
-  first(UnorderedPages, FirstPage, OtherPages),
-  order(OtherPages, OrderedPages).
+order(UnorderedPages, [FirstPage|OrderedPages]) :- first(UnorderedPages, FirstPage, OtherPages), order(OtherPages, OrderedPages).
 
 orderedCenter(Pages, Center) :- order(Pages, OrderedPages), center(OrderedPages, Center).
 
-result([_, Pages], Sum) :-
-  findall(P, (member(P, Pages), unordered(P)), UnorderedPages),
-  maplist(orderedCenter, UnorderedPages, CenterPages),
-  sumlist(CenterPages, Sum).
+resultPart1([_, Pages], Sum) :- include(ordered, Pages, UnorderedPages), mapsum(UnorderedPages, center, Sum).
+resultPart2([_, Pages], Sum) :- include(unordered, Pages, UnorderedPages), mapsum(UnorderedPages, orderedCenter, Sum).
 
 /* required for loadData */
 resetData :- retractall(before(_,_)).

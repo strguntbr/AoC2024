@@ -6,6 +6,10 @@ on:
         description: 'Day to execute (leave empty to execute all days)'
         required: false
         default: ''
+      part:
+        description: 'The part of the day to execute (either "1" or "2" or just leave empty to execute both parts). Will be ignored if the day is not set.'
+        required: false
+        default: ''
 
 jobs:
   solve:
@@ -20,4 +24,4 @@ jobs:
       - name: Checkout AoC
         uses: actions/checkout@v1
       - name: Solve
-        run: if [ -z "${{ github.event.inputs.day }}" ]; then ./solveAll.sh; else ./solveAll.sh "${{ github.event.inputs.day }}_"; fi
+        run: if [ -z "${{ github.event.inputs.day }}" ]; then ./solveAll.sh; else ./solveAll.sh "${{ github.event.inputs.day }}" "${{ github.event.inputs.part }}"; fi

@@ -1,10 +1,12 @@
 # Advent of Code
 
-This repository contains my attemps to solve the puzzles of [Advent of Code 2024](https://adventofcode.com/2024). I will try to keep a naming scheme like `[day]_[part].prolog` so e.g. `1_1.prolog` will be the first puzzle of the first day. Please be fair and do not look at solutions to riddles you have not solved yourself.
+This repository contains my attemps to solve the puzzles of [Advent of Code 2024](https://adventofcode.com/2024). I will try to keep a naming scheme like `day[_part].prolog` where the `_part` is optional. If the filename contains a part it will only contain the solution to this part of the day. Filenames without the part will contain both parts. So e.g. `1_1.prolog` will be the first puzzle of the first day, but e.g. `2.prolog` will contain both parts for the second day. Please be fair and do not look at solutions to riddles you have not solved yourself.
 
 ## Execution
 
-You can either load and execute each riddle individually in prolog by running the goal `solve.` or just execute the bash script `solveAll.sh` which will solve all puzzles in the repository in ascending order. `solveAll.sh` accepts an optional argument that is used as a prefix to filter the files that shall be executes. So e.g. `./solveAll.sh 2_` will only solve the puzzles of day 2.
+You can either load and execute each riddle individually in prolog by running the goal `solve.` or just execute the bash script `solveAll.sh` which will solve all puzzles in the repository in ascending order. `solveAll.sh` accepts two optional arguments that select which day and part shall be executed. So e.g. `./solveAll.sh 2` will only solve the puzzles of day 2 and e.g. `./solveAll.sh 3 1` will only solve the first part of day 3. The part argument will be ignored if the day is set to an empty string.
+
+There is also a script `testAll.sh` that accepts the same parameters as `solveAll.sh` but only executes the tests for the selected puzzles.
 
 Either way you will need a prolog interpreter (e.g. swi-prolog) - which needs to be accessible on the path as  `prolog` for the bash script to work.
 
