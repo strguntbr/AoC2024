@@ -68,7 +68,7 @@ getData(Data) :- p_day(Day), fileForDay(Day, 'input', File), loadData(Data, File
 getData(_) :- write('Error: Could not load puzzle data'), delayedHalt(5).
 checkLoadError([], _) :- !.
 checkLoadError(Error, ErrorHandler) :- format('Error: ~w', [Error]), call(ErrorHandler).
-executePuzzle(Data, Part) :- p_postProcessData(Data, PostprocessedData), p_result(Part, PostprocessedData, none, Result), !, checkError(Result, puzzle), p_formatResult(Result, FormattedResult), writeResult('Result is ', FormattedResult), p_finalize(Result).
+executePuzzle(Data, Part) :- p_postProcessData(Data, PostprocessedData), p_auxData(AuxData), p_result(Part, PostprocessedData, AuxData, Result), !, checkError(Result, puzzle), p_formatResult(Result, FormattedResult), writeResult('Result is ', FormattedResult), p_finalize(Result).
 executePuzzle(_, _) :- write('Error: could not find result for puzzle data'), delayedHalt(7).
 
 writeFirstResultLine(ResultLine, 0) :- p_notInlineResult, !, writeln(""), white(ResultLine, WhiteResultLine), write(WhiteResultLine).
@@ -173,6 +173,7 @@ p_notInlineResult :- \+ isAnsiXterm ; current_predicate(notInlineResult/0).
 p_inlineWrongResult :- isAnsiXterm, current_predicate(inlineWrongResult/0).
 p_inlineWrongResult :- isAnsiXterm, \+ p_notInlineResult.
 p_hideExpectedResultForDiff :- isAnsiXterm, current_predicate(hideExpectedResultForDiff/0).
+p_auxData(AuxData) :- current_predicate(auxData/1) -> auxData(AuxData) ; AuxData = none.
 p_part("part1") :- current_predicate(resultPart1/2) ; current_predicate(resultPart1/3).
 p_part("part2") :- current_predicate(resultPart2/2) ; current_predicate(resultPart2/3).
 p_part("single") :- current_predicate(result/2) ; current_predicate(result/3).
