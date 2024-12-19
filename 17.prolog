@@ -4,9 +4,6 @@ day(17). testResult(part1, "4,6,3,5,6,3,5,2,1,0"). testResult(part2, "test-2", 1
 
 comboOperand([A,B,C], Operand, Value) :- nth0(Operand, [0,1,2,3,A,B,C], Value).
 
-resultToString([E], Result) :- !, number_string(E, Result).
-resultToString([H|T], Result) :- number_string(H, HStr), resultToString(T, TStr), string_concat(HStr,",",  HStrSep), string_concat(HStrSep, TStr, Result).
-
 adv([A,B,C], Operand, [An,B,C]) :- comboOperand([A,B,C], Operand, Value), An is A >> Value.
 bxl([A,B,C], Operand, [A,Bn,C]) :- Bn is B xor Operand.
 bst([A,B,C], Operand, [A,Bn,C]) :- comboOperand([A,B,C], Operand, Value), Bn is Value mod 8.
@@ -29,6 +26,7 @@ appendNumber("", Number, Number) :- !.
 appendNumber(String, "", String) :- !.
 appendNumber(String, Number, AppendedNumberString) :- string_concat(String, ",", StringSep), string_concat(StringSep, Number, AppendedNumberString).
 
+/* Part 1 */
 process(Program, _, IP, "") :- length(Program, PL), IP >= PL, !.
 process(Program, Registers, IP, Output) :-
   IPt is IP+2,
@@ -36,6 +34,8 @@ process(Program, Registers, IP, Output) :-
   instruction(Opcode, Operand, Registers, NextRegisters, IPt, IPn, InstructionOutput),
   process(Program, NextRegisters, IPn, NextOutput),
   appendNumber(InstructionOutput, NextOutput, Output).
+
+resultPart1([["A",A],["B",B],["C",C],_,Program], Output) :- process(Program, [A,B,C], 0, Output).
 
 processSingleOutput(Program, Registers, IP, Output) :-
   IPt is IP+2,
@@ -45,23 +45,18 @@ processSingleOutput(Program, Registers, IP, Output) :-
     processSingleOutput(Program, NextRegisters, IPn, Output)
   )).
 
-nextBits(Last7Bits, Next10Bits) :- between(0, 7, First3Bits), Next10Bits is (First3Bits << 7) \/ Last7Bits.
+iterativeSolve(_, [], A, A).
+iterativeSolve(Program, [First|Rest], CurA, Result) :-
+  between(0, 7, Last3Bits), NextA is Last3Bits \/ (CurA << 3),
+  processSingleOutput(Program, [NextA,0,0], 0, First),
+  iterativeSolve(Program, Rest, NextA, Result).
 
-iterativeSolve(_, [], 0, 0).
-iterativeSolve(Program, [First|Rest], Last7Bits, Result) :-
-  nextBits(Last7Bits, Next10Bits),
-  /* It could make sense to aggregate on each iteration, but as we don't get much results anyway, */
-  /* its simpler and faster to just produce all and aggregate outside.                            */
-  processSingleOutput(Program, [Next10Bits,0,0], 0, First),
-  Next7Bits is Next10Bits >> 3,
-  iterativeSolve(Program, Rest, Next7Bits, NextResult),
-  Result is (NextResult << 3) \/ (Next10Bits /\ 7).
-
-resultPart1([["A",A],["B",B],["C",C],_,Program], Output) :- process(Program, [A,B,C], 0, Output).
-
+/* Part 2 */
 resultPart2([["A",_],["B",_],["C",_],_,Program], Result) :-
   checkAssumptions(Program),
-  aggregate_all(min(R), (between(0, 127, Starting7Bits), iterativeSolve(Program, Program, Starting7Bits, R)), Result).
+  between(0, 7, Starting7Bits),
+  reverse(Program, Output),
+  iterativeSolve(Program, Output, Starting7Bits, Result).
 
 checkAssumptions(Program) :-
   (
