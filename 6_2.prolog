@@ -45,7 +45,7 @@ result(Data, Count) :-
   length(Loops, Count).
 
 /* required for loadData */
-resetData :- retractall(lab(_,_)), retractall(visited(_,_)), retractall(obstacle(_)), retractall(tempVisited(_,_)).
+initPredicates :- dynamic(obstacle/1).
 
 data_line(Index, Start, Line) :- string_chars(Line, Data), assertLab(Index, 1, Data, Start).
 

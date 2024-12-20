@@ -21,8 +21,6 @@ resultPart1([_, Pages], Sum) :- include(ordered, Pages, UnorderedPages), mapsum(
 resultPart2([_, Pages], Sum) :- include(unordered, Pages, UnorderedPages), mapsum(UnorderedPages, orderedCenter, Sum).
 
 /* required for loadData */
-resetData :- retractall(before(_,_)).
-
 data_line([], Line) :-
   split_string(Line, "|", "", [First,Second]), !,
   maplist(number_string, [FirstPage, SecondPage], [First,Second]),

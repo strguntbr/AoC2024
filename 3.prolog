@@ -24,6 +24,6 @@ resultPart1(Memory, Products) :- flatten(Memory, FlatMemory), instr(FlatMemory, 
 resultPart2(Memory, Products) :- assert(extendedMode), flatten(Memory, FlatMemory), instr(FlatMemory, 1, Products).
 
 /* required for loadData */
-resetData :- retractall(extendedMode).
+initPredicates :- dynamic(extendedMode/0).
 
 data_line(Data, Line) :- string_chars(Line, Data).

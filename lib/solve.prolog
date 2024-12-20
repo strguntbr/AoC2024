@@ -29,9 +29,10 @@ delayedHalt(ExitCode) :- halt(ExitCode). /* delayed halt not yet implemented, ju
 
 loadData_(GroupedData, File) :-
   current_predicate(groupData/0), !,
-  p_resetData, readLines(File, Lines),
+  p_initPredicates,
+  readLines(File, Lines),
   groupLines(Lines, GroupedLines), groupedData_groupedLines(GroupedData, GroupedLines).
-loadData_(Data, File) :- p_resetData, readLines(File, Lines), data_lines(Data, Lines).
+loadData_(Data, File) :- p_initPredicates, readLines(File, Lines), data_lines(Data, Lines).
 
 loadData(Data, File, []) :- exists_file(File), !, loadData_(Data, File).
 loadData([], File, Error) :- format(string(Error), 'File ~w does not exist', [File]).
@@ -86,7 +87,7 @@ verifyTests(_) :- current_predicate(skipTest/0), !, testSkipped(Status), format(
 verifyTests(Part) :- p_initDynamicTests(Part),
   (
     not(testResult_(_, Part, _, _)) -> noTests(Status)
-    ; forall(testResult_(File, Part, AuxData, ExpectedResult), verifyTest(File, Part, AuxData, ExpectedResult)), testPassed(Status)
+    ; forall(testResult_(File, Part, AuxData, ExpectedResult), snapshot(verifyTest(File, Part, AuxData, ExpectedResult))), testPassed(Status)
   ), 
   format('[~w] ', [Status]).
 
@@ -99,7 +100,6 @@ executeTest(File, Part, TestData, AuxData, ExpectedResult) :- p_postProcessData(
 executeTest(File, _, _, _, _) :- testFailed(Status), format('[~w] No solution for test data ~w found', [Status, File]), delayedHalt(3).
 verifyResult(_, _, TestResult, TestResult) :- !.
 verifyResult(File, _, WrongResult, ExpectedResult) :- testFailed(Status), format("[~w] Test ~w returned ", [Status, File]), writeErrorResults(ExpectedResult, WrongResult), delayedHalt(4).
-/*part(Part, Text) :- member([Part, Text], [[part1, 'Part 1 test'], [part2, 'Part 2 test'], [single, 'Test']]).*/
 
 checkError(error{missing: Missing}, puzzle) :- !, format('~w implementation is missing', [Missing]), delayedHalt(9).
 checkError(error{missing: Missing}, test) :- !, testFailed(Status), format('[~w] ~w implementation is missing', [Status, Missing]), delayedHalt(9).
@@ -150,7 +150,7 @@ testSkipped(Text) :- yellow('TESTS  SKIPPED', Text).
 
 /* proxies for methods defined outside this  file */
 p_day(Day) :- day(Day).
-p_resetData :- current_predicate(resetData/0) -> resetData ; true.
+p_initPredicates :- current_predicate(initPredicates/0) -> initPredicates ; true.
 p_postProcessData(Data, PostprocessedData) :- current_predicate(postProcessData/2) -> postProcessData(Data, PostprocessedData) ; PostprocessedData=Data.
 p_data_line(Index, Data, Line) :- current_predicate(data_line/3) -> data_line(Index, Data, Line) ; current_predicate(data_line/2) -> data_line(Data, Line) ; Data=Line.
 p_result(part1, Data, AuxData, Result) :- AuxData = none -> (current_predicate(resultPart1/2) -> resultPart1(Data, Result) ; Result=error{missing: "resultPart1/2"}) ; (current_predicate(resultPart1/3) -> resultPart1(Data, AuxData, Result) ; Result=error{missing: "resultPart1/3"}).

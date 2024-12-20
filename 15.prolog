@@ -68,8 +68,6 @@ resultPart2([_, Robot, Instructions], CoordinateSum) :-
   aggregate_all(sum(C), finalBoxCoordinate2(C), CoordinateSum).
 
 /* required for loadData */
-resetData :- retractall(box(_)), retractall(boxPart(_,_)), retractall(wall(_)).
-
 data_line(Chars, Line) :- string_chars(Line, Chars).
 postProcessData([Map, InstructionList], [[RobotX, Robot1Y], [RobotX, Robot2Y], Instructions]) :- 
   assertMap(0, Map, [RobotX, Robot1Y]),

@@ -20,10 +20,7 @@ resultPart2([Start, End], Result) :-
   setof(Tile, Dir^member([Tile,Dir],Path), Tiles), length(Tiles, Result).
 
 /* required for loadData */
-resetData :- retractall(tile(_)).
-postProcessData(StartEnd, [StartPos, EndPos]) :- 
-  member(Start, StartEnd), member(start(StartPos), Start),
-  member(End, StartEnd), member(end(EndPos), End).
+postProcessData(StartEnd, [StartPos, EndPos]) :- append(StartEnd, StartEndAll), member(start(StartPos), StartEndAll), member(end(EndPos), StartEndAll).
 
 data_line(Index, StartEnd, Line) :- string_chars(Line, Chars), assertMaze(Index, 1, Chars, StartEnd).
 

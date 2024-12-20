@@ -28,7 +28,6 @@ cheat([Xs,Ys], MaxCheatLength, [Xe,Ye], TimeSaved) :-
 resultPart2(_, Shortcut, Result) :- aggregate_all(count, [S,E], (cheat(S,20,E,TimeSaved), TimeSaved>=Shortcut), Result).
 
 /* required for loadData */
-resetData :- retractall(wall(_)), retractall(track(_)), retractall(track(_,_)).
 postProcessData(Data, [Start,End]) :- 
   append(Data, StartEnd), member(start(Start), StartEnd), member(end(End), StartEnd),
   calculateTrackPositions(Start, 0, End).

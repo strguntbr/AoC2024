@@ -23,8 +23,6 @@ result(Data, Count) :-
   sort(Path, SortedPath), length(SortedPath, Count).
 
 /* required for loadData */
-resetData :- retractall(lab(_,_)).
-
 data_line(Index, Start, Line) :- string_chars(Line, Data), assertLab(Index, 1, Data, Start).
 
 assertLab(_, _, [], []).

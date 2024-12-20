@@ -39,6 +39,4 @@ hasImageAfter(Robots, BathroomSize, Seconds) :- moveAll(Robots, Seconds, Bathroo
 resultPart2(Robots, BathroomSize, Seconds) :- between(0, infinite, Seconds), hasImageAfter(Robots, BathroomSize, Seconds).
 
 /* required for loadData */
-resetData :- retractall(min(_)), assert(min(10000000000000000)), retractall(pos(_,_)).
-
 data_line([[Px, Py], [Vx, Vy]], Line) :- split_string(Line, ", ", "pv=", Parts), maplist(number_string, [Px, Py, Vx, Vy], Parts), !.

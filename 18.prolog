@@ -26,8 +26,6 @@ resultPart2(Data, [Size,__], Result) :-
   string_concat(X, ",", XSep), string_concat(XSep, Y, Result).
 
 /* required for loadData */
-resetData :- retractall(size(_)), retractall(duration(_)), retractall(corruptMemory(_,_)).
-
 data_line(Time, [X,Y], Line) :-
   split_string(Line, ",", "", NumberStrings),
   maplist(number_string, [X,Y], NumberStrings),

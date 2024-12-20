@@ -57,7 +57,7 @@ resultPart1(_, Perimeters) :- findall(Region, region(_, Region), Regions), mapsu
 resultPart2(_, Perimeters) :- findall(Region, region(_, Region), Regions), mapsum(Regions, discountedPrice, Perimeters).
 
 /* required for loadData */
-resetData :- retractall(plant(_,_)), retractall(visited(_)).
+initPredicates :- dynamic(plant/2), dynamic(visited/1).
 
 data_line(Index, Plants, Line) :- string_chars(Line, Plants), assertGarden(Index, 1, Plants).
 

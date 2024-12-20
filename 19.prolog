@@ -24,7 +24,7 @@ resultPart2([[Towels], Logos], Result) :- mapsum(Logos, [L,A]>>countArrangements
 resultPart1_alternative([[Towels], Logos], Result) :- aggregate_all(count, (member(Logo, Logos), \+ countArrangements(Towels, Logo, 0)), Result).
 
 /* required for loadData */
-resetData :- retractall(impossible(_)), retractall(arrangements(_,_)).
+initPredicates :- dynamic(impossible/1), dynamic(arrangements/2).
 
 data_line(Logo, Line) :- split_string(Line, ",", " ", [LogoString]), !, string_chars(LogoString, Logo).
 data_line(Towels, Line) :- split_string(Line, ",", " ", TowelStrings), maplist(string_chars, TowelStrings, Towels).
