@@ -61,7 +61,7 @@ printParts([Part|T]) :- writeln(Part), printParts(T).
 solve :- printResult(single).
 solve(Part) :- printResult(Part).
 
-printResult(Part) :- verifyTests(Part), printResultWithoutTest(Part).
+printResult(Part) :- verifyTests(Part, false), flush_output, write(" "), printResultWithoutTest(Part).
 printResultWithoutTest(Part) :- getData(Data), executePuzzle(Data, Part).
 
 getTestData(Data) :- p_day(Day), fileForDay(Day, 'test', File), loadData(Data, File, Error), checkLoadError(Error, fail).
@@ -69,7 +69,7 @@ getData(Data) :- p_day(Day), fileForDay(Day, 'input', File), loadData(Data, File
 getData(_) :- write('Error: Could not load puzzle data'), delayedHalt(5).
 checkLoadError([], _) :- !.
 checkLoadError(Error, ErrorHandler) :- format('Error: ~w', [Error]), call(ErrorHandler).
-executePuzzle(Data, Part) :- p_postProcessData(Data, PostprocessedData), p_auxData(AuxData), p_result(Part, PostprocessedData, AuxData, Result), !, checkError(Result, puzzle), p_formatResult(Result, FormattedResult), writeResult('Result is ', FormattedResult), p_finalize(Result).
+executePuzzle(Data, Part) :- p_postProcessData(Data, PostprocessedData), p_auxData(AuxData), call_time(p_result(Part, PostprocessedData, AuxData, Result), Time), !, checkError(Result, puzzle), p_formatResult(Result, FormattedResult), writeResult('Result is ', FormattedResult, Time), p_finalize(Result).
 executePuzzle(_, _) :- write('Error: could not find result for puzzle data'), delayedHalt(7).
 
 writeFirstResultLine(ResultLine, 0) :- p_notInlineResult, !, writeln(""), white(ResultLine, WhiteResultLine), write(WhiteResultLine).
@@ -77,19 +77,26 @@ writeFirstResultLine(ResultLine, StartPos) :- cursorPosition(StartPos), white(Re
 writeOtherResultLine(StartPos, ResultLine) :- writeln(""), Move is StartPos - 1, moveCursor(Move, right), white(ResultLine, WhiteResultLine), write(WhiteResultLine).
 writeMultilineResult([SingleLine]) :- !, white(SingleLine, WhiteResult), write(WhiteResult).
 writeMultilineResult([FirstLine|OtherLines]) :- !, writeFirstResultLine(FirstLine, StartPos), foreach(member(Line, OtherLines), writeOtherResultLine(StartPos, Line)).
-writeResult(_, _) :- p_hideResult, !.
-writeResult(Header, Result) :- string(Result), !, write(Header), split_string(Result, "\n", "", Lines), writeMultilineResult(Lines). /* split multiline result to list and print as aligned list */
-writeResult(Header, Result) :- white(Result, WhiteResult), write(Header), write(WhiteResult).
+writeResult(_, _, _) :- p_hideResult, !.
+writeResult(Header, Result, Time) :- string(Result), !, write(Header), split_string(Result, "\n", "", Lines), writeMultilineResult(Lines), formatTime(Time.cpu, FormattedTime), format(' (~w)', FormattedTime). /* split multiline result to list and print as aligned list */
+writeResult(Header, Result, Time) :- white(Result, WhiteResult), formatTime(Time.cpu, FormattedTime), format('~w~w (~w)', [Header, WhiteResult, FormattedTime]).
+
+formatTime(Time, FormattedTime) :- Time < 1, !, Ms is round(Time * 1000 * 1000) / 1000, format(atom(FormattedTime), '~3fms', Ms).
+formatTime(Time, FormattedTime) :- Time < 60, !, S is round(Time * 1000) / 1000, format(atom(FormattedTime), '~3fs', S).
+formatTime(Time, FormattedTime) :- Time < 600, !, M is round(Time) div 60, S is round(Time) mod 60, format(atom(FormattedTime), '~dm ~ds', [M,S]).
+formatTime(Time, FormattedTime) :- Time < 3600, !, M is round(Time / 60), format(atom(FormattedTime), '~dm', M).
+formatTime(Time, FormattedTime) :- H is round(Time) div 3600, M is round(Time / 60) mod 60, format(atom(FormattedTime), '~dh ~dm', [H,M]).
 
 testResult_(File, Part, AuxData, ExpectedResult) :- p_testResult(Part, Extension, AuxData, ExpectedResult), p_day(Day), format(atom(File), 'input/~w.~w', [Day, Extension]).
 
-verifyTests(_) :- current_predicate(skipTest/0), !, testSkipped(Status), format('[~w] ', [Status]).
-verifyTests(Part) :- p_initDynamicTests(Part),
+verifyTests(Part) :- verifyTests(Part, true).
+verifyTests(_, _) :- current_predicate(skipTest/0), !, testSkipped(Status), format('[~w] ', [Status]).
+verifyTests(Part, TimingEnabled) :- p_initDynamicTests(Part),
   (
-    not(testResult_(_, Part, _, _)) -> noTests(Status)
-    ; forall(testResult_(File, Part, AuxData, ExpectedResult), snapshot(verifyTest(File, Part, AuxData, ExpectedResult))), testPassed(Status)
-  ), 
-  format('[~w] ', [Status]).
+    not(testResult_(_, Part, _, _)) -> (noTests(Status), FormattedTime = "")
+    ; call_time(forall(testResult_(File, Part, AuxData, ExpectedResult), snapshot(verifyTest(File, Part, AuxData, ExpectedResult))), Time), formatTime(Time.cpu, FT), format(atom(FormattedTime), ' (~w)', [FT]), testPassed(Status)
+  ),
+  (TimingEnabled -> format('[~w]~w', [Status, FormattedTime]) ; format('[~w]', [Status])).
 
 verifyTest(File, Part, AuxData, ExpectedResult) :- getTestData(File, TestData), executeTest(File, Part, TestData, AuxData, ExpectedResult).
 getTestData(File, TestData) :- loadData(TestData, File, Error), !, checkTestLoadError(Error).
